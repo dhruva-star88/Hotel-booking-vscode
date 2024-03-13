@@ -1,7 +1,10 @@
 import streamlit as st
 import requests
 from streamlit_lottie import st_lottie
+import pandas as pd
+from backend import Hotel
 
+df = pd.read_csv("hotels.csv", dtype={"id": str})
 
 def load_lottie_url(url):
     r = requests.get(url)
@@ -19,3 +22,26 @@ with right_col:
 
 with left_col:
     st_lottie(animation, height=250, width=700, key="coding",speed=1)
+
+st.header("Hotels Available For Booking: ")
+# Load Dataframe in webpage
+st.dataframe(df, hide_index=True, width=1500)
+# Regestration
+st.header("Please do your Registration: ")
+col1, col2 = st.columns(2)
+with col1:
+    with st.form("Registration"):
+        # Get name
+        name = st.text_input(label="Name", max_chars=30, placeholder="Please Enter Your Name")
+        # Get Hotel ID
+        hotel_id = st.text_input(label="Hotel ID", max_chars=3, placeholder="Please Enter The Hotel ID...")
+        submit = st.form_submit_button("SUBMIT")
+    if submit: 
+        try:
+            hotel = Hotel(hotel_id)
+            if hotel.availability():
+                hotel.book()
+            else:
+                st.warning("Hotel is Not available", icon="😔")
+        except ValueError:
+            st.info("Please Enter Correct ID", icon="💡")
