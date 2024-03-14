@@ -2,9 +2,12 @@ import streamlit as st
 import requests
 from streamlit_lottie import st_lottie
 import pandas as pd
-from backend import Hotel
+from backend import Hotel, ReservationTicket
+
+#from streamlit.connections import SQLConnection
 
 df = pd.read_csv("hotels.csv", dtype={"id": str})
+#st.connection(name="sql", type=SQLConnection)
 
 def load_lottie_url(url):
     r = requests.get(url)
@@ -33,6 +36,8 @@ with col1:
     with st.form("Registration"):
         # Get name
         name = st.text_input(label="Name", max_chars=30, placeholder="Please Enter Your Name")
+        # Get Mobile number
+        mobile_nr = st.text_input(label="Mobile Number", max_chars=10, placeholder="Please Enter your 10 digit number...")
         # Get Hotel ID
         hotel_id = st.text_input(label="Hotel ID", max_chars=3, placeholder="Please Enter The Hotel ID...")
         submit = st.form_submit_button("SUBMIT")
@@ -40,8 +45,17 @@ with col1:
         try:
             hotel = Hotel(hotel_id)
             if hotel.availability():
-                hotel.book()
+                hotel.book() 
+                ticket = ReservationTicket(customer_name=name, ph_number=mobile_nr, hotel_name=hotel,)
+                content = ticket.generate()
             else:
                 st.warning("Hotel is Not available", icon="😔")
         except ValueError:
             st.info("Please Enter Correct ID", icon="💡")
+
+        st.header("Your Ticket has been booked")
+        st.subheader("THANK YOU FOR VISITING OUR HOTEL:")
+        st.write("Here are your following Booking Deatils: ")
+        st.write(f"Name: {content[0]}")
+        st.write(f"Hotel: {content[2]}")
+     

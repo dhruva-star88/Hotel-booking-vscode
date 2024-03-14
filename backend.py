@@ -1,4 +1,6 @@
 import pandas as pd
+import sqlite3 as sq
+
 
 df = pd.read_csv("Hotels.csv", dtype={"id": str})
 
@@ -18,9 +20,33 @@ class Hotel:
         df.loc[df["id"] == self.hotel_id, "available"] = "no"
         df.to_csv("hotels.csv", index=False)
 
+class ReservationTicket:
+    def __init__(self, customer_name, hotel_name, ph_number):
+        self.customer_name = customer_name
+        self.hotel_name = hotel_name
+        self.ph_number = ph_number
+        
+    def generate(self):
+        content = self.customer_name, self.ph_number, self.hotel_name.hotel_name
+        return content
+
+class Database(ReservationTicket):
+    def store(self, content):
+        connection = sq.connect("reg_data.db")
+        cursor = connection.cursor()
+        cursor.execute("INSERT INTO events VALUES (?,?,?)", content)
+        connection.commit()
+
+       
 if __name__ == "__main__":
     print(df)
     hotel = Hotel("134")
     if hotel.availability():
         print(hotel.availability())
         hotel.book()
+        ticket = Database( customer_name="Dhruva",hotel_name=hotel,ph_number="8867291499")
+        content = ticket.generate()
+        print(content)
+        ticket.store(content=content)
+
+         
