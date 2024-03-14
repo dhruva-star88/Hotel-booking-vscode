@@ -21,30 +21,32 @@ class Hotel:
         df.to_csv("hotels.csv", index=False)
 
 class ReservationTicket:
-    def __init__(self, customer_name, hotel_name, ph_number):
+    def __init__(self, customer_name, hotel_name, ph_number, email_id):
         self.customer_name = customer_name
         self.hotel_name = hotel_name
         self.ph_number = ph_number
+        self.email_id = email_id
         
     def generate(self):
-        content = self.customer_name, self.ph_number, self.hotel_name.hotel_name
+        content = self.customer_name, self.ph_number,self.email_id, self.hotel_name.hotel_name
         return content
 
 class Database(ReservationTicket):
     def store(self, content):
-        connection = sq.connect("reg_data.db")
+        connection = sq.connect("D:\Python course\Hotel-Booking #VSCODE\data.db")
         cursor = connection.cursor()
-        cursor.execute("INSERT INTO events VALUES (?,?,?)", content)
+        cursor.execute("INSERT INTO event1 VALUEs(?,?,?,?)", content)
         connection.commit()
+        connection.close
 
-       
+
 if __name__ == "__main__":
     print(df)
     hotel = Hotel("134")
     if hotel.availability():
         print(hotel.availability())
         hotel.book()
-        ticket = Database( customer_name="Dhruva",hotel_name=hotel,ph_number="8867291499")
+        ticket = Database( customer_name="Dhruva",hotel_name=hotel,ph_number="8867291499", email_id="dhruvatej6565@gmail.com")
         content = ticket.generate()
         print(content)
         ticket.store(content=content)
