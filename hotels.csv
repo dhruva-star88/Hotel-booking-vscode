@@ -1,4 +1,8 @@
 id,name,city,capacity,available
+<<<<<<< HEAD
 134,Tourist Sunny Apartment,Anchorage,4,no
+=======
+134,Tourist Sunny Apartment,Anchorage,4,yes
+>>>>>>> 26eb493bf5348de073c81687945ceceb6533ad16
 188,Snow Palace,New Delhi,5,yes
 655,City Break Inn,Porto-Novo,3,no
