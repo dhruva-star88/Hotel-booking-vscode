@@ -2,7 +2,7 @@ import streamlit as st
 import requests
 from streamlit_lottie import st_lottie
 import pandas as pd
-from backend import Hotel, Database
+from backend import Hotel, Database, PdfTicket
 
 #from streamlit.connections import SQLConnection
 
@@ -51,6 +51,8 @@ with col1:
                 ticket = Database(customer_name=name, ph_number=mobile_nr, hotel_name=hotel, email_id=email)
                 details = ticket.generate()
                 ticket.store(content= details)
+                pdf_ticket = PdfTicket(content=details)
+                pdf_ticket.pdf_generate()
             else:
                 st.warning("Hotel is Not available", icon="😔")
         except ValueError:

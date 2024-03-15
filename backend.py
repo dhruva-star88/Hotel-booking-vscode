@@ -1,6 +1,6 @@
 import pandas as pd
 import sqlite3 as sq
-
+from ticket_pdf import pdf_gen
 
 df = pd.read_csv("Hotels.csv", dtype={"id": str})
 
@@ -33,11 +33,18 @@ class ReservationTicket:
 
 class Database(ReservationTicket):
     def store(self, content):
-        connection = sq.connect("D:\Python course\Hotel-Booking #VSCODE\data.db")
+        connection = sq.connect("D:\Python course\hotel-booking in vscode\data.db")
         cursor = connection.cursor()
         cursor.execute("INSERT INTO event1 VALUEs(?,?,?,?)", content)
         connection.commit()
         connection.close
+
+class PdfTicket:
+    def __init__(self, content):
+        self.content = content
+    
+    def pdf_generate(self):
+        return pdf_gen(self.content)
 
 
 if __name__ == "__main__":
@@ -50,5 +57,6 @@ if __name__ == "__main__":
         content = ticket.generate()
         print(content)
         ticket.store(content=content)
-
+        pdf_ticket = PdfTicket(content=content)
+        pdf_ticket.pdf_generate()
          

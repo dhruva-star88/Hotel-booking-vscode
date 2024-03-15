@@ -1,21 +1,29 @@
-import sqlite3 
+from fpdf import FPDF
 
-# Connect to the database
-con = sqlite3.connect("D:\Python course\Hotel-Booking #VSCODE\data.db")
-cursor = con.cursor()
+pdf = FPDF(orientation="P", unit="mm", format="A4")
+pdf.add_page()
+pdf.set_font(family="Times", style="B", size=30)
+pdf.cell(w=0, h=0, txt="Digital Reservation Ticket", align="L", ln=1)
+pdf.line(x1=10, y1=15, x2=200, y2=15)
+pdf.ln(4)
+pdf.set_font(family="Times", style="B", size=20)
+pdf.cell(w=0, h=20, txt="Welcome To Hotel Name", align="L", ln=1)
+pdf.set_font(family="Times",style="B", size=15)
+pdf.cell(w=0, h=4, txt="Thank you for visiting our Hotel", align="L", ln=1)
+pdf.ln(4)
+pdf.set_font(family="Times",style="B", size=15)
+pdf.cell(w=0, h=4, txt="Here Your Booking Deatils:", align="L", ln=1)
+pdf.ln(4)
+pdf.set_font(family="Times",style="B", size=15)
+pdf.cell(w=0, h=4, txt="Name: Dhruva", align="L", ln=1)
+pdf.ln(3)
+pdf.set_font(family="Times",style="B", size=15)
+pdf.cell(w=0, h=4, txt="Mobile Number: 8867291499", align="L", ln=1)
+pdf.ln(3)
+pdf.set_font(family="Times",style="B", size=15)
+pdf.cell(w=0, h=4, txt="Email ID: dhruvatej6565@gmail.com", align="L", ln=1)
+pdf.ln(3)
+pdf.set_font(family="Times",style="B", size=15)
+pdf.cell(w=0, h=4, txt="Hotel: Snow Palace", align="L", ln=1)
 
-# Define the data to be inserted
-data = ("1", "2", "3", "5")
-
-# Insert the data into the database
-cursor.execute("INSERT INTO event1 VALUES(?, ?, ?, ?)", data)
-
-# Commit the changes to the database
-con.commit()
-
-# Check if the data was inserted
-cursor.execute("SELECT * FROM event1")
-print(cursor.fetchall())
-
-# Close the database connection
-con.close()
+pdf.output("output.pdf")
