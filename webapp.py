@@ -2,7 +2,7 @@ import streamlit as st
 import requests
 from streamlit_lottie import st_lottie
 import pandas as pd
-from backend import Hotel, Database, PdfTicket
+from backend import Hotel, Database, PdfTicket, SendEmail
 
 #from streamlit.connections import SQLConnection
 
@@ -53,6 +53,8 @@ with col1:
                 ticket.store(content= details)
                 pdf_ticket = PdfTicket(content=details)
                 pdf_ticket.pdf_generate()
+                email = SendEmail(content=details)
+                email.generate_email()
             else:
                 st.warning("Hotel is Not available", icon="😔")
         except ValueError:
@@ -63,4 +65,5 @@ with col1:
         st.write("Here are your following Booking Deatils: ")
         st.write(f"Name: {details[0]}")
         st.write(f"Hotel: {details[3]}")
+        st.subheader("Your Digital Ticket has been sent to your Gmail")
      

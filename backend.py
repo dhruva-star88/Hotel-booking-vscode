@@ -1,6 +1,7 @@
 import pandas as pd
 import sqlite3 as sq
 from ticket_pdf import pdf_gen
+from send_ticket_mail import send_email
 
 df = pd.read_csv("Hotels.csv", dtype={"id": str})
 
@@ -46,6 +47,12 @@ class PdfTicket:
     def pdf_generate(self):
         return pdf_gen(self.content)
 
+class SendEmail:
+    def __init__(self, content):
+        self.content = content
+
+    def generate_email(self):
+        send_email(receiver_email=self.content[2])
 
 if __name__ == "__main__":
     print(df)
@@ -59,4 +66,6 @@ if __name__ == "__main__":
         ticket.store(content=content)
         pdf_ticket = PdfTicket(content=content)
         pdf_ticket.pdf_generate()
+        email = SendEmail(content=content)
+        email.generate_email()
          

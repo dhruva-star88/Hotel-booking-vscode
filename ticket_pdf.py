@@ -29,7 +29,7 @@ def pdf_gen(content):
     pdf.ln(4)
     pdf.set_font(family="Times",style="B", size=15)
     pdf.cell(w=0, h=4, txt="Your Ticket Has Been Booked Successfully", align="L", ln=1)
-    output = pdf.output("output.pdf")
+    output = pdf.output("ticket.pdf")
     return output
 
 

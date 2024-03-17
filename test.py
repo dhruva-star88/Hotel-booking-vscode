@@ -1,29 +1,53 @@
-from fpdf import FPDF
+import smtplib
+from email.mime.multipart import MIMEMultipart
+from email.mime.text import MIMEText
+from email.mime.base import MIMEBase
+from email import encoders
+import os
 
-pdf = FPDF(orientation="P", unit="mm", format="A4")
-pdf.add_page()
-pdf.set_font(family="Times", style="B", size=30)
-pdf.cell(w=0, h=0, txt="Digital Reservation Ticket", align="L", ln=1)
-pdf.line(x1=10, y1=15, x2=200, y2=15)
-pdf.ln(4)
-pdf.set_font(family="Times", style="B", size=20)
-pdf.cell(w=0, h=20, txt="Welcome To Hotel Name", align="L", ln=1)
-pdf.set_font(family="Times",style="B", size=15)
-pdf.cell(w=0, h=4, txt="Thank you for visiting our Hotel", align="L", ln=1)
-pdf.ln(4)
-pdf.set_font(family="Times",style="B", size=15)
-pdf.cell(w=0, h=4, txt="Here Your Booking Deatils:", align="L", ln=1)
-pdf.ln(4)
-pdf.set_font(family="Times",style="B", size=15)
-pdf.cell(w=0, h=4, txt="Name: Dhruva", align="L", ln=1)
-pdf.ln(3)
-pdf.set_font(family="Times",style="B", size=15)
-pdf.cell(w=0, h=4, txt="Mobile Number: 8867291499", align="L", ln=1)
-pdf.ln(3)
-pdf.set_font(family="Times",style="B", size=15)
-pdf.cell(w=0, h=4, txt="Email ID: dhruvatej6565@gmail.com", align="L", ln=1)
-pdf.ln(3)
-pdf.set_font(family="Times",style="B", size=15)
-pdf.cell(w=0, h=4, txt="Hotel: Snow Palace", align="L", ln=1)
+password = os.getenv("hotel_book_test1")
+body = '''Hello,
+This is the body of the email
+sicerely yours
+G.G.
+'''
+sender = 'workdhruvateja@gmail.com'
+password = password
+receiver = 'dhruvatej6565@gmail.com'
 
-pdf.output("output.pdf")
+# Setup the MIME
+message = MIMEMultipart()
+message['From'] = sender
+message['To'] = receiver
+message['Subject'] = 'This email has an attacment, a pdf file'
+
+message.attach(MIMEText(body, 'plain'))
+
+pdfname = 'output.pdf'
+
+# open the file in bynary
+binary_pdf = open(pdfname, 'rb')
+
+payload = MIMEBase('application', 'octate-stream', Name=pdfname)
+payload.set_payload((binary_pdf).read())
+
+# enconding the binary into base64
+encoders.encode_base64(payload)
+
+# add header with pdf name
+payload.add_header('Content-Decomposition', 'attachment', filename=pdfname)
+message.attach(payload)
+
+# use gmail with port
+session = smtplib.SMTP('smtp.gmail.com', 587)
+
+# enable security
+session.starttls()
+
+# login with mail_id and password
+session.login(sender, password)
+
+text = message.as_string()
+session.sendmail(sender, receiver, text)
+session.quit()
+print('Mail Sent')
