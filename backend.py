@@ -5,7 +5,7 @@ from send_ticket_mail import send_email
 
 df = pd.read_csv("Hotels.csv", dtype={"id": str})
 df_cards = pd.read_csv("cards.csv", dtype=str)
-
+connection = sq.connect("D:\Python course\hotel-booking in vscode\data.db", check_same_thread=False)
 class Hotel:
     def __init__(self, id):
         self.hotel_id = id
@@ -23,14 +23,19 @@ class Hotel:
         df.to_csv("hotels.csv", index=False)
 
 class CreditCard:
-    def __init__(self, card_nr):
+    def __init__(self, card_nr, holder, expiration, cvc):
         self.card_nr = card_nr
+        self.holder = holder
+        self.expiration = expiration
+        self.cvc = cvc
     def enquire(self):
         enquire = df_cards.loc[df_cards["number"] == self.card_nr, "number"].squeeze()
         if enquire == self.card_nr:
             return True
         else:
             return False
+    def details(self):
+        return self.holder, self.card_nr, self.expiration, self.cvc
 
 class ReservationTicket:
     def __init__(self, customer_name, hotel_name, ph_number, email_id):
@@ -44,13 +49,16 @@ class ReservationTicket:
         return content
 
 class Database(ReservationTicket):
-    def store(self, content):
-        connection = sq.connect("D:\Python course\hotel-booking in vscode\data.db")
+    def store_person_details(self, content):
         cursor = connection.cursor()
         cursor.execute("INSERT INTO event1 VALUEs(?,?,?,?)", content)
         connection.commit()
         connection.close
-
+    def store_credit_details(self, details):
+        cursor = connection.cursor()
+        cursor.execute("INSERT INTO event2 VALUEs(?,?,?,?)", details)
+        connection.commit()
+        connection.close
 class PdfTicket:
     def __init__(self, content):
         self.content = content
@@ -70,13 +78,15 @@ if __name__ == "__main__":
     hotel = Hotel("134")
     print(hotel.availability())
     if hotel.availability():
-        credit_card = CreditCard(card_nr="1234")
+        credit_card = CreditCard(card_nr="1234", holder="DHRUVA TEJA", expiration="12/26", cvc="123")
         if credit_card.enquire():
+            credit_details = credit_card.details()
             hotel.book()
             ticket = Database( customer_name="Dhruva",hotel_name=hotel,ph_number="8867291499", email_id="dhruva@gmail.com")
             content = ticket.generate()
             print(content)
-            ticket.store(content=content)
+            ticket.store_person_details(content=content)
+            ticket.store_credit_details(details=credit_details)
             pdf_ticket = PdfTicket(content=content)
             pdf_ticket.pdf_generate()
             email = SendEmail(content=content)

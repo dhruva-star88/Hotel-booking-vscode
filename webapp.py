@@ -4,6 +4,7 @@ from streamlit_lottie import st_lottie
 import pandas as pd
 from backend import Hotel, Database, PdfTicket, SendEmail, CreditCard
 
+
 df = pd.read_csv("hotels.csv", dtype={"id": str})
 
 
@@ -55,28 +56,35 @@ with col1:
         try:
             hotel = Hotel(hotel_id)
             if hotel.availability():
-                credit_card = CreditCard(card_nr=card_nr)
-                if credit_card.enquire():
-                    hotel.book() 
-                    ticket = Database(customer_name=name, ph_number=mobile_nr, hotel_name=hotel, email_id=email)
-                    details = ticket.generate()
-                    ticket.store(content= details)
-                    pdf_ticket = PdfTicket(content=details)
-                    pdf_ticket.pdf_generate()
-                    email = SendEmail(content=details)
-                    email.generate_email()
-                else:
-                    st.warning("Enter Proper Credit Card Number")
+                credit_card = CreditCard(card_nr=card_nr,holder=holder_name, expiration=expiration, cvc=cvc)
+                try:
+                    if credit_card.enquire():
+                        credit_details = credit_card.details()
+                        hotel.book() 
+                        ticket = Database(customer_name=name, ph_number=mobile_nr, hotel_name=hotel, email_id=email)
+                        details = ticket.generate()
+                        ticket.store_person_details(content= details)
+                        ticket.store_credit_details(details=credit_details)
+                        pdf_ticket = PdfTicket(content=details)
+                        pdf_ticket.pdf_generate()
+                        email = SendEmail(content=details)
+                        email.generate_email()
+                except ValueError:
+                    st.error("Enter Proper Credit Card Number", icon="☠️")
             else:
                 st.warning("Hotel is Not available", icon="😔")
         except ValueError:
             st.info("Please Enter Correct ID", icon="💡")
-
-        st.header("Your Ticket has been booked")
-        st.subheader("THANK YOU FOR VISITING OUR HOTEL:")
-        st.write("Here are your following Booking Deatils: ")
-        st.write(f"Name: {details[0]}")
-        st.write(f"Hotel: {details[3]}")
-        st.subheader("Your Digital Ticket has been sent to your Gmail")
+        try:
+            u_name = details[0]
+            h_name = details[3]
+            st.header("Your Ticket has been booked")
+            st.subheader("THANK YOU FOR VISITING OUR HOTEL:")
+            st.write("Here are your following Booking Deatils: ")
+            st.write(f"Name: {u_name}")
+            st.write(f"Hotel: {h_name}")
+            st.subheader("Your Digital Ticket has been sent to your Gmail")
+        except NameError:
+            pass
         
         
