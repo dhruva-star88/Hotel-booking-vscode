@@ -4,6 +4,7 @@ from ticket_pdf import pdf_gen
 from send_ticket_mail import send_email
 
 df = pd.read_csv("Hotels.csv", dtype={"id": str})
+df_cards = pd.read_csv("cards.csv", dtype=str)
 
 class Hotel:
     def __init__(self, id):
@@ -20,6 +21,16 @@ class Hotel:
     def book(self):
         df.loc[df["id"] == self.hotel_id, "available"] = "no"
         df.to_csv("hotels.csv", index=False)
+
+class CreditCard:
+    def __init__(self, card_nr):
+        self.card_nr = card_nr
+    def enquire(self):
+        enquire = df_cards.loc[df_cards["number"] == self.card_nr, "number"].squeeze()
+        if enquire == self.card_nr:
+            return True
+        else:
+            return False
 
 class ReservationTicket:
     def __init__(self, customer_name, hotel_name, ph_number, email_id):
@@ -57,15 +68,17 @@ class SendEmail:
 if __name__ == "__main__":
     print(df)
     hotel = Hotel("134")
+    print(hotel.availability())
     if hotel.availability():
-        print(hotel.availability())
-        hotel.book()
-        ticket = Database( customer_name="Dhruva",hotel_name=hotel,ph_number="8867291499", email_id="dhruvatej6565@gmail.com")
-        content = ticket.generate()
-        print(content)
-        ticket.store(content=content)
-        pdf_ticket = PdfTicket(content=content)
-        pdf_ticket.pdf_generate()
-        email = SendEmail(content=content)
-        email.generate_email()
+        credit_card = CreditCard(card_nr="1234")
+        if credit_card.enquire():
+            hotel.book()
+            ticket = Database( customer_name="Dhruva",hotel_name=hotel,ph_number="8867291499", email_id="dhruva@gmail.com")
+            content = ticket.generate()
+            print(content)
+            ticket.store(content=content)
+            pdf_ticket = PdfTicket(content=content)
+            pdf_ticket.pdf_generate()
+            email = SendEmail(content=content)
+            email.generate_email()
          

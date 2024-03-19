@@ -2,12 +2,10 @@ import streamlit as st
 import requests
 from streamlit_lottie import st_lottie
 import pandas as pd
-from backend import Hotel, Database, PdfTicket, SendEmail
-
-#from streamlit.connections import SQLConnection
+from backend import Hotel, Database, PdfTicket, SendEmail, CreditCard
 
 df = pd.read_csv("hotels.csv", dtype={"id": str})
-#st.connection(name="sql", type=SQLConnection)
+
 
 def load_lottie_url(url):
     r = requests.get(url)
@@ -33,7 +31,7 @@ st.dataframe(df, hide_index=True, width=1500)
 st.header("Please do your Registration: ")
 col1, col2 = st.columns(2)
 with col1:
-    with st.form("Registration"):
+    with st.form("Registration",border=False):
         # Get name
         name = st.text_input(label="Name", max_chars=30, placeholder="Please Enter Your Name")
         # Get Mobile number
@@ -42,19 +40,33 @@ with col1:
         email = st.text_input(label="Email ID", max_chars=40, placeholder="Please type your email id...")
         # Get Hotel ID
         hotel_id = st.text_input(label="Hotel ID", max_chars=3, placeholder="Please Enter The Hotel ID...")
+        # Billing Details
+        st.header("Please Fill your billing details: ")
+        # Get holder Name
+        holder_name = st.text_input(label="Holder Name", max_chars=30, placeholder="Please Enter Holder Name...")
+        # Get card number
+        card_nr = st.text_input(label="Credit Card Number", max_chars=10, placeholder="Please Enter Card Number...")
+        # Get Expiration
+        expiration = st.text_input(label="Expiration Number(M/Y)", max_chars=8, placeholder="Please Enter Expiration date...") 
+        # Get cvc
+        cvc = st.text_input(label="CVC Number", max_chars=3, placeholder="Please Enter CVC...")
         submit = st.form_submit_button("SUBMIT")
     if submit: 
         try:
             hotel = Hotel(hotel_id)
             if hotel.availability():
-                hotel.book() 
-                ticket = Database(customer_name=name, ph_number=mobile_nr, hotel_name=hotel, email_id=email)
-                details = ticket.generate()
-                ticket.store(content= details)
-                pdf_ticket = PdfTicket(content=details)
-                pdf_ticket.pdf_generate()
-                email = SendEmail(content=details)
-                email.generate_email()
+                credit_card = CreditCard(card_nr=card_nr)
+                if credit_card.enquire():
+                    hotel.book() 
+                    ticket = Database(customer_name=name, ph_number=mobile_nr, hotel_name=hotel, email_id=email)
+                    details = ticket.generate()
+                    ticket.store(content= details)
+                    pdf_ticket = PdfTicket(content=details)
+                    pdf_ticket.pdf_generate()
+                    email = SendEmail(content=details)
+                    email.generate_email()
+                else:
+                    st.warning("Enter Proper Credit Card Number")
             else:
                 st.warning("Hotel is Not available", icon="😔")
         except ValueError:
@@ -66,4 +78,5 @@ with col1:
         st.write(f"Name: {details[0]}")
         st.write(f"Hotel: {details[3]}")
         st.subheader("Your Digital Ticket has been sent to your Gmail")
-     
+        
+        
