@@ -2,7 +2,7 @@ import streamlit as st
 import requests
 from streamlit_lottie import st_lottie
 import pandas as pd
-from backend import Hotel, Database, PdfTicket, SendEmail, CreditCard
+from backend import Hotel, Database, PdfTicket, SendEmail, CreditCard, CardSecuirty
 
 
 df = pd.read_csv("hotels.csv", dtype={"id": str})
@@ -42,7 +42,7 @@ with col1:
         # Get Hotel ID
         hotel_id = st.text_input(label="Hotel ID", max_chars=3, placeholder="Please Enter The Hotel ID...")
         # Billing Details
-        st.header("Please Fill your billing details: ")
+        st.header("Please fill your billing details: ")
         # Get holder Name
         holder_name = st.text_input(label="Holder Name", max_chars=30, placeholder="Please Enter Holder Name...")
         # Get card number
@@ -51,6 +51,11 @@ with col1:
         expiration = st.text_input(label="Expiration Number(M/Y)", max_chars=8, placeholder="Please Enter Expiration date...") 
         # Get cvc
         cvc = st.text_input(label="CVC Number", max_chars=3, placeholder="Please Enter CVC...")
+        # Card Security
+        st.subheader("Enter the Card Password")
+        # Get Password
+        pass_wd = st.text_input(label="Password", type="password", placeholder="Please type your password...")
+        # Submit Button 
         submit = st.form_submit_button("SUBMIT")
     if submit: 
         try:
@@ -60,15 +65,19 @@ with col1:
                 try:
                     if credit_card.enquire():
                         credit_details = credit_card.details()
-                        hotel.book() 
-                        ticket = Database(customer_name=name, ph_number=mobile_nr, hotel_name=hotel, email_id=email)
-                        details = ticket.generate()
-                        ticket.store_person_details(content= details)
-                        ticket.store_credit_details(details=credit_details)
-                        pdf_ticket = PdfTicket(content=details)
-                        pdf_ticket.pdf_generate()
-                        email = SendEmail(content=details)
-                        email.generate_email()
+                        card_security = CardSecuirty(card_num=credit_details[1], user_pass_wd=pass_wd)
+                        if card_security.authenticate():
+                            hotel.book() 
+                            ticket = Database(customer_name=name, ph_number=mobile_nr, hotel_name=hotel, email_id=email)
+                            details = ticket.generate()
+                            ticket.store_person_details(content= details)
+                            ticket.store_credit_details(details=credit_details)
+                            pdf_ticket = PdfTicket(content=details)
+                            pdf_ticket.pdf_generate()
+                            email = SendEmail(content=details)
+                            email.generate_email()
+                        else:
+                            st.error("Credit Card Authentication Failed..Please Try again Later..", icon="❌")
                 except ValueError:
                     st.error("Enter Proper Credit Card Number", icon="☠️")
             else:
